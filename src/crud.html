@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalized Itinerary Manager</title>
+    <style>
+        body {
+            background-color: #f9f4f4;
+            font-family: 'Poppins', sans-serif;
+            color: #4b2c2c;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        .header {
+            width: 100%;
+            padding: 15px;
+            background-color: #800000; 
+            color: white;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin: 20px auto;
+        }
+        .header a {
+            color: #800000;
+            text-decoration: none;
+            font-size: 16px;
+            background-color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 4px;
+            margin-top: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .header a:hover {
+            background-color: #e29b9b;
+        }
+        h2 {
+            font-size: 24px;
+            color: #800000;
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="date"], textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            color: #4b2c2c;
+        }
+        .btn {
+            background-color: #800000;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #b00000;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .info-section {
+            background-color: #ffe6e6;
+            padding: 15px;
+            border-radius: 5px;
+            color: #800000;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Personalized Itinerary Manager</h1>
+        <a href="index.html">Back to Home</a>
+    </div>
+
+    <div class="container">
+        <h2>Manage Your Itinerary</h2>
+        <input type="text" id="fileName" placeholder="Enter itinerary title" />
+        <textarea id="fileContents" placeholder="Enter itinerary details and country-specific information..."></textarea>
+        
+        <!-- Add travel dates with calendar picker -->
+        <label for="travelDates">Travel Dates:</label>
+        <input type="date" id="startDate" placeholder="Start Date" />
+        <input type="date" id="endDate" placeholder="End Date" />
+
+        <h3>Accommodation Details</h3>
+        <input type="text" id="hotelName" placeholder="Hotel Name" />
+        <input type="text" id="hotelAddress" placeholder="Hotel Address" />
+        <input type="text" id="hotelContact" placeholder="Hotel Contact" />
+
+        <h3>Emergency Contacts</h3>
+        <textarea id="emergencyContacts" placeholder="List of emergency contacts..."></textarea>
+
+        <div class="button-group">
+            <button id="btnCreate" class="btn">Create</button>
+            <button id="btnRead" class="btn">Read</button>
+            <button id="btnUpdate" class="btn">Update</button>
+            <button id="btnDelete" class="btn">Delete</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript CRUD functions
+
+        document.getElementById('btnCreate').addEventListener('click', function() {
+            let fileName = document.getElementById('fileName').value;
+            let fileContents = document.getElementById('fileContents').value;
+            let startDate = document.getElementById('startDate').value;
+            let endDate = document.getElementById('endDate').value;
+            let hotelName = document.getElementById('hotelName').value;
+            let hotelAddress = document.getElementById('hotelAddress').value;
+            let hotelContact = document.getElementById('hotelContact').value;
+            let emergencyContacts = document.getElementById('emergencyContacts').value;
+
+            if (!fileName || !fileContents) {
+                alert("Itinerary title and details are required!");
+                return;
+            }
+
+            let itineraryData = {
+                contents: fileContents,
+                travelDates: `${startDate} - ${endDate}`,
+                hotel: {
+                    name: hotelName,
+                    address: hotelAddress,
+                    contact: hotelContact
+                },
+                emergencyContacts: emergencyContacts
+            };
+
+            localStorage.setItem(fileName, JSON.stringify(itineraryData));
+            alert(fileName + " saved successfully!");
+            document.getElementById('fileName').value = '';
+            document.getElementById('fileContents').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('hotelName').value = '';
+            document.getElementById('hotelAddress').value = '';
+            document.getElementById('hotelContact').value = '';
+            document.getElementById('emergencyContacts').value = '';
+        });
+
+        document.getElementById('btnRead').addEventListener('click', function() {
+            let fileName = document.getElementById('fileName').value;
+            let itineraryData = localStorage.getItem(fileName);
+
+            if (itineraryData === null) {
+                alert("Itinerary not found!");
+            } else {
+                itineraryData = JSON.parse(itineraryData);
+                document.getElementById('fileContents').value = itineraryData.contents;
+                let [startDate, endDate] = itineraryData.travelDates.split(' - ');
+                document.getElementById('startDate').value = startDate;
+                document.getElementById('endDate').value = endDate;
+                document.getElementById('hotelName').value = itineraryData.hotel.name;
+                document.getElementById('hotelAddress').value = itineraryData.hotel.address;
+                document.getElementById('hotelContact').value = itineraryData.hotel.contact;
+                document.getElementById('emergencyContacts').value = itineraryData.emergencyContacts;
+
+                alert(fileName + " read successfully!");
+            }
+        });
+
+        document.getElementById('btnUpdate').addEventListener('click', function() {
+            let fileName = document.getElementById('fileName').value;
+            let fileContents = document.getElementById('fileContents').value;
+
+            if (localStorage.getItem(fileName) === null) {
+                alert("Itinerary not found!");
+            } else {
+                localStorage.setItem(fileName, fileContents);
+                alert(fileName + " updated successfully!");
+            }
+        });
+
+        document.getElementById('btnDelete').addEventListener('click', function() {
+            let fileName = document.getElementById('fileName').value;
+
+            if (localStorage.getItem(fileName) === null) {
+                alert("Itinerary not found!");
+            } else {
+                localStorage.removeItem(fileName);
+                alert(fileName + " deleted successfully!");
+                document.getElementById('fileName').value = '';
+                document.getElementById('fileContents').value = '';
+            }
+        });
+    </script>
+</body>
+</html>

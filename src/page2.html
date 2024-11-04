@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Explorer - Countries</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f7f0f0;
+            color: #4d0f0f;
+        }
+
+        header {
+            background-color: #771717;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+            color: white;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-button {
+            background-color: #ffffff;
+            color: #771717;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-left: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-button:hover {
+            background-color: #c06868;
+            color: white;
+        }
+
+        h1 {
+            margin-top: 50px;
+            font-size: 28px;
+        }
+
+        section {
+            display: flex;
+            width: 100%;
+        }
+
+        nav {
+            flex: 1;
+            background: #c06868;
+            padding: 20px;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .country-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .country-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background-color: #b54141;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            flex-basis: calc(33.33% - 10px);
+            box-sizing: border-box;
+        }
+
+        .country-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            background-color: #800000;
+        }
+
+        .country-flag {
+            width: 50px;
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .country-details {
+            flex: 3;
+            margin-top: 30px;
+            background-color: #fff5f5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        img {
+            max-width: 100px;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 600px) {
+            section {
+                flex-direction: column;
+            }
+            .country-item {
+                flex-basis: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2 id="regionTitle">Countries in </h2>
+        <div>
+            <a href="index.html" class="nav-button">Home</a>
+            <a href="crud.html" class="nav-button">Itinerary</a>
+        </div>
+    </header>
+
+    <section>
+        <nav>
+            <ul class="country-list" id="countryList"></ul>
+        </nav>
+        
+        <article class="country-details" id="countryDetails" style="display: none;"></article>
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const region = urlParams.get("region");
+            const regionCountries = {
+                "Antarctic": ["United States", "Russia", "United Kingdom", "Australia", "New Zealand", "Argentina"],
+                "Americas": ["United States", "Brazil", "Canada", "Mexico", "Argentina", "Colombia"],
+                "Europe": ["France", "Italy", "United Kingdom", "Germany", "Spain", "Greece"],
+                "Africa": ["Egypt", "South Africa", "Morocco", "Kenya", "Nigeria", "Tanzania"],
+                "Asia": ["Malaysia", "Japan", "India", "South Korea", "Thailand", "Indonesia"],
+                "Oceania": ["Australia", "New Zealand", "Fiji", "Papua New Guinea", "Samoa", "Tonga"]
+            };
+
+            if (region && regionCountries[region]) {
+                document.getElementById("regionTitle").textContent += region;
+
+                fetch(`https://restcountries.com/v3.1/all`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const countryList = document.getElementById("countryList");
+
+                        const topCountries = data.filter(country =>
+                            regionCountries[region].includes(country.name.common)
+                        );
+
+                        topCountries.forEach(country => {
+                            const countryItem = document.createElement("li");
+                            countryItem.className = "country-item";
+
+                            const flagImg = document.createElement("img");
+                            flagImg.src = country.flags?.png;
+                            flagImg.alt = `Flag of ${country.name.common}`;
+                            flagImg.className = "country-flag";
+
+                            const countryName = document.createElement("span");
+                            countryName.textContent = country.name.common;
+
+                            countryItem.appendChild(flagImg);
+                            countryItem.appendChild(countryName);
+
+                            countryItem.addEventListener("click", function() {
+                                displayCountryDetails(country);
+                            });
+
+                            countryList.appendChild(countryItem);
+                        });
+                    })
+                    .catch(error => console.error("Error fetching countries:", error));
+            } else {
+                document.getElementById("regionTitle").textContent = "Region not found";
+            }
+        });
+
+        function displayCountryDetails(country) {
+            const detailsDiv = document.getElementById("countryDetails");
+            detailsDiv.style.display = 'block';
+
+            detailsDiv.innerHTML = ''; 
+            detailsDiv.innerHTML += `<h2>${country.name.common}</h2>`;
+            detailsDiv.innerHTML += `<p><strong>Area:</strong> ${country.area} km²</p>`;
+            detailsDiv.innerHTML += `<p><strong>Continent:</strong> ${country.continents?.[0] || 'N/A'}</p>`;
+            detailsDiv.innerHTML += `<p><strong>Region:</strong> ${country.region}</p>`;
+            detailsDiv.innerHTML += `<p><strong>Subregion:</strong> ${country.subregion}</p>`;
+            detailsDiv.innerHTML += `<p><strong>Capital:</strong> ${country.capital?.[0] || 'N/A'}</p>`;
+            detailsDiv.innerHTML += `<p><strong>Languages:</strong> ${Object.values(country.languages || {}).join(', ')}</p>`;
+            detailsDiv.innerHTML += `<p><strong>Timezones:</strong> ${country.timezones.join(', ')}</p>`;
+            detailsDiv.innerHTML += `<p><strong>Population:</strong> ${country.population}</p>`;
+
+            // Fetch currency information
+            if (country.currencies) {
+                const currencyInfo = Object.values(country.currencies).map(currency => 
+                    `${currency.name} (${currency.symbol})`
+                ).join(', ');
+                detailsDiv.innerHTML += `<p><strong>Currency:</strong> ${currencyInfo}</p>`;
+            } else {
+                detailsDiv.innerHTML += `<p><strong>Currency:</strong> N/A</p>`;
+            }
+            // Fetching startOfWeek (if applicable)
+            if (country.startOfWeek) {
+                detailsDiv.innerHTML += `<p><strong>Start of Week:</strong> ${country.startOfWeek}</p>`;
+            }
+            detailsDiv.innerHTML += `<img src="${country.flags?.png}" alt="Flag of ${country.name.common}">`;
+            detailsDiv.innerHTML += `<img src="${country.coatOfArms?.png || ''}" alt="Coat of Arms of ${country.name.common}" style="max-width: 100px;">`;
+
+
+
+            // Adding Google Maps Link
+            const lat = country.latlng?.[0] || '';
+            const lng = country.latlng?.[1] || '';
+            detailsDiv.innerHTML += `<h3>Map:</h3><iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.8354345099496!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a5d1fbf7b0d202d%3A0x5045675218ce6e8!2s${country.name.common}!5e0!3m2!1sen!2sus!4v1635721835776!5m2!1sen!2sus" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>`;
+        }
+    </script>
+</body>
+</html>
